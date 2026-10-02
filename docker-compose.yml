@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: feraaura-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: feraaura
+      POSTGRES_PASSWORD: feraaura
+      POSTGRES_DB: feraaura
+    ports:
+      - "5433:5432"
+    volumes:
+      - feraaura_pg:/var/lib/postgresql/data
+
+volumes:
+  feraaura_pg:

@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  description  String?
+  isPublished  Boolean   @default(true)
+  displayOrder Int       @default(0)
+  products     Product[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([isPublished, displayOrder])
+}
+
+model Product {
+  id               String         @id @default(cuid())
+  name             String
+  slug             String         @unique
+  shortDescription String
+  description      String         @db.Text
+  price            Decimal?       @db.Decimal(10, 2)
+  currency         String         @default("TRY")
+  coverImage       String?
+  coverImageKey    String?
+  categoryId       String
+  category         Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  isFeatured       Boolean        @default(false)
+  isPublished      Boolean        @default(false)
+  displayOrder     Int            @default(0)
+  images           ProductImage[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([isPublished, isFeatured, displayOrder])
+  @@index([categoryId])
+}
+
+model ProductImage {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url          String
+  storageKey   String?
+  alt          String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([productId, displayOrder])
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  url          String
+  storageKey   String?
+  alt          String?
+  caption      String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([displayOrder])
+}
+
+model HomepageContent {
+  id                  String   @id @default(cuid())
+  key                 String   @unique
+  title               String
+  description         String   @db.Text
+  imageUrl            String?
+  imageKey            String?
+  primaryButtonText   String?
+  primaryButtonUrl    String?
+  secondaryButtonText String?
+  secondaryButtonUrl  String?
+  isVisible           Boolean  @default(true)
+  displayOrder        Int      @default(0)
+  updatedAt           DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                String   @id @default("default")
+  brandName         String
+  logoUrl           String?
+  logoKey           String?
+  instagramUrl      String?
+  email             String?
+  phone             String?
+  address           String?
+  footerDescription String   @db.Text
+  updatedAt         DateTime @updatedAt
+}
